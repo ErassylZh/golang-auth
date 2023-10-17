@@ -12,6 +12,7 @@ type (
 	Config struct {
 		Service  *Service
 		Database *Database
+		Security *Security
 	}
 
 	Service struct {
@@ -25,6 +26,9 @@ type (
 		DBHost     string `envconfig:"DB_HOST"`
 		DBPort     string `envconfig:"DB_PORT"`
 		SSLMODE    string `envconfig:"SSL_MODE"`
+	}
+	Security struct {
+		SecretKey string `envconfig:"SECRETKEY"`
 	}
 )
 
@@ -41,7 +45,7 @@ func GetConfig(envfiles ...string) (*Config, error) {
 		var c Config
 		err = envconfig.Process("", &c)
 		if err != nil {
-			a
+
 			err = fmt.Errorf("error parse config from env variables: %w\n", err)
 			return
 		}
