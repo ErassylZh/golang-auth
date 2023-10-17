@@ -6,8 +6,10 @@ import (
 )
 
 type Repositories struct {
+	User User
 }
 
 func NewRepositories(db *gorm.DB, cfg *config.Config) (*Repositories, error) {
-	return &Repositories{}, nil
+	userRepo := NewUserDB(db)
+	return &Repositories{User: userRepo}, nil
 }

@@ -8,6 +8,7 @@ import (
 //go:generate go run github.com/golang/mock/mockgen -source=service.go -destination=service_mock.go -package=service
 
 type Services struct {
+	User User
 }
 
 type Deps struct {
@@ -16,6 +17,6 @@ type Deps struct {
 }
 
 func NewServices(deps Deps) *Services {
-
-	return &Services{}
+	userService := NewUserService(deps.Repos.User)
+	return &Services{User: userService}
 }

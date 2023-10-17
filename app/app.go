@@ -3,6 +3,7 @@ package app
 import (
 	"auth/config"
 	"auth/handler"
+	"auth/model"
 	"auth/repository"
 	"auth/service"
 	"fmt"
@@ -17,6 +18,7 @@ func Run(cfg *config.Config) {
 		" dbname=" + cfg.Database.DBName + " sslmode=" + cfg.Database.SSLMODE
 	fmt.Println(dsn)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db.AutoMigrate(&model.User{})
 	if err != nil {
 		panic("Failed to connect to database")
 	}
