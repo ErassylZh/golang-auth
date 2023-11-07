@@ -7,6 +7,7 @@ import (
 	"auth/repository"
 	"auth/service"
 	"fmt"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -14,6 +15,12 @@ import (
 
 func Run(cfg *config.Config) {
 	r := gin.Default()
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"}, // Разрешить доступ с любого источника
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
+		AllowCredentials: true,
+	}))
 	dsn := "user=" + cfg.Database.DBUser + " password=" + cfg.Database.DBPassword +
 		" dbname=" + cfg.Database.DBName + " sslmode=" + cfg.Database.SSLMODE
 	fmt.Println(dsn)

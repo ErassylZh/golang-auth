@@ -15,6 +15,8 @@ type User interface {
 	GetByID(Id uint) (record model.User, err error)
 	Create(data schema.RegisterRequest) (model.User, error)
 	GetForLogin(request schema.LoginRequest) (string, error)
+	ParseToken(token string) (*jwt.Token, error)
+	ExtractUserIDFromJWT(tokenString string) (int, error)
 }
 
 type UserService struct {
@@ -58,4 +60,47 @@ func (s *UserService) GetForLogin(request schema.LoginRequest) (string, error) {
 		return "", err
 	}
 	return tokenString, nil
+}
+
+func (s *UserService) ParseToken(tokenString string) (*jwt.Token, error) {
+	cfg, _ := config.GetConfig()
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// Проверка алгоритма подписи
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Неподдерживаемый метод подписи: %v", token.Header["alg"])
+		}
+		return []byte(cfg.Security.SecretKey), nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Проверка валидности токена
+	if !token.Valid {
+		return nil, fmt.Errorf("Недействительный токен")
+	}
+
+	return token, nil
+}
+
+func (s *UserService) ExtractUserIDFromJWT(tokenString string) (int, error) {
+	token, err := s.ParseToken(tokenString)
+	if err != nil {
+		return 0, err
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return 0, fmt.Errorf("Ошибка извлечения утверждений из токена")
+	}
+
+	sub, ok := claims["sub"].(float64)
+	if !ok {
+		return 0, fmt.Errorf("Ошибка извлечения ID пользователя из токена")
+	}
+
+	userID := int(sub)
+	return userID, nil
 }
